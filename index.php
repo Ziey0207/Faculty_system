@@ -9,7 +9,7 @@ if (isset($_SESSION['user_id'])) {
 }
 
 // AJAX validation endpoint - Enhanced with detailed error messages
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['validate'])) {
+if (isset($_SERVER['REQUEST_METHOD']) == 'POST' && isset($_POST['validate'])) {
     $field = $_POST['field'];
     $value = trim($_POST['value']);
     $user_type = $_POST['user_type'] ?? 'student';
@@ -122,7 +122,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['validate'])) {
 
 
 // Handle login
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['login'])) {
+if (isset($_SERVER['REQUEST_METHOD']) == 'POST' && isset($_POST['login'])) {
     $username = trim($_POST['username']);
     $password = trim($_POST['password']);
     $user_type = $_POST['user_type'];
@@ -190,7 +190,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['login'])) {
 }
 
 // Handle registration
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['register'])) {
+if (isset($_SERVER['REQUEST_METHOD']) == 'POST' && isset($_POST['register'])) {
     $first_name = trim($_POST['first_name'] ?? '');
     $last_name = trim($_POST['last_name'] ?? '');
     $middle_name = trim($_POST['middle_name'] ?? '');
