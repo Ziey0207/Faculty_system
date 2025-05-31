@@ -14,6 +14,37 @@ $user_type = $_SESSION['user_type'];
 $name = $_SESSION['name'];
 $username = $_SESSION['username'];
 
+$active_section = 'dashboard';
+if (isset($_GET['section'])) {
+    $allowed_sections = match ($user_type) {
+        'super_admin' => [
+            'dashboard', 'user_management', 'system_config', 'reports', 'settings',
+            'manage_users', 'manage_departments', 'manage_subjects', 'manage_rooms',
+            'manage_courses', 'approve_registrations', 'audit_logs', 'system_settings'
+        ],
+        'admin' => [
+            'dashboard', 'user_management', 'reports', 'settings', 'system_config',
+            'manage_faculty', 'manage_students', 'manage_subjects', 'manage_rooms',
+            'course_management', 'approve_workflows', 'department_reports'
+        ],
+        'faculty' => [
+            'dashboard', 'schedule', 'attendance', 'settings', 'personal_info',
+            'submit_preferences', 'course_materials', 'student_attendance',
+            'grade_submission', 'view_reports'
+        ],
+        'student' => [
+            'dashboard', 'schedule', 'courses', 'settings', 'view_grades',
+            'course_registration', 'attendance_records', 'resources',
+            'academic_progress', 'view_schedule'
+        ],
+        default => ['dashboard', 'settings']
+    };
+    
+    if (in_array($_GET['section'], $allowed_sections)) {
+        $active_section = $_GET['section'];
+    }
+}
+
 // Get user preferences
 $preferences = [
     'theme' => 'system',

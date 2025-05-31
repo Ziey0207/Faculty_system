@@ -83,7 +83,7 @@ $save_error = $save_error ?? null;
                     
                     <div class="mb-4">
                         <label class="block text-sm font-medium mb-1">Theme</label>
-                        <select name="theme" class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:border-primary focus:ring-1 focus:ring-primary">
+                        <select name="theme" class="w-full px-3 py-2 rounded-lg border focus:border-primary focus:ring-1 focus:ring-primary">
                             <option value="light" <?= $preferences['theme'] === 'light' ? 'selected' : '' ?>>Light</option>
                             <option value="dark" <?= $preferences['theme'] === 'dark' ? 'selected' : '' ?>>Dark</option>
                             <option value="system" <?= $preferences['theme'] === 'system' ? 'selected' : '' ?>>System Default</option>
@@ -108,7 +108,7 @@ $save_error = $save_error ?? null;
                     
                     <div class="mb-4">
                         <label class="block text-sm font-medium mb-1">Results per page</label>
-                        <select name="results_per_page" class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:border-primary focus:ring-1 focus:ring-primary">
+                        <select name="results_per_page" class="w-full px-3 py-2 rounded-lg border focus:border-primary focus:ring-1 focus:ring-primary">
                             <option value="5" <?= $preferences['results_per_page'] === 5 ? 'selected' : '' ?>>5</option>
                             <option value="10" <?= $preferences['results_per_page'] === 10 ? 'selected' : '' ?>>10</option>
                             <option value="20" <?= $preferences['results_per_page'] === 20 ? 'selected' : '' ?>>20</option>
@@ -133,7 +133,7 @@ $save_error = $save_error ?? null;
                 </div>
             </div>
         </div>
-
+        <!-- Theme Customization -->
         <div>
                     <h2 class="text-2xl font-bold mb-6">Theme Customization</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">

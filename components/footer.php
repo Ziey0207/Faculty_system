@@ -8,30 +8,21 @@
     });
     
     // Theme toggle
-    document.getElementById('theme-toggle').addEventListener('click', function() {
+    document.getElementById('theme-toggle')?.addEventListener('click', function() {
         const isDark = document.documentElement.classList.toggle('dark');
         const theme = isDark ? 'dark' : 'light';
         
-        // Create form to save preference
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = '';
-        form.style.display = 'none';
+        // Save preference via AJAX
+        const formData = new FormData();
+        formData.append('theme', theme);
+        formData.append('save_preferences', '1');
         
-        const themeInput = document.createElement('input');
-        themeInput.type = 'hidden';
-        themeInput.name = 'theme';
-        themeInput.value = theme;
-        
-        const saveInput = document.createElement('input');
-        saveInput.type = 'hidden';
-        saveInput.name = 'save_preferences';
-        saveInput.value = '1';
-        
-        form.appendChild(themeInput);
-        form.appendChild(saveInput);
-        document.body.appendChild(form);
-        form.submit();
+        fetch('', {
+            method: 'POST',
+            body: formData
+        }).catch(error => {
+            console.error('Error saving theme:', error);
+        });
     });
     
     // Apply theme based on preference

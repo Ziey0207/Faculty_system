@@ -21,6 +21,8 @@
             --card-bg: #ffffff;
             --sidebar-bg: #1e293b;
             --header-bg: #ffffff;
+            --form-text: #0a1819; /* Light mode text */
+
         }
         
         .dark {
@@ -29,6 +31,8 @@
             --card-bg: #1e293b;
             --sidebar-bg: #0f172a;
             --header-bg: #1e293b;
+            --form-text: #e5f4f5; /* Dark mode text */
+
         }
         
         body {
@@ -38,15 +42,13 @@
             transition: background-color 0.3s, color 0.3s;
         }
 
-            select {
-        color: var(--text-primary);
+    textarea, input[type="text"], input[type="email"], input[type="password"], input[type="tel"], select, select option {
         background-color: var(--card-bg);
-        border-color: var(--text-primary);
-    }
-    
-    select option {
-        background-color: var(--card-bg);
-        color: var(--text-primary);
+        color: var(--form-text);
+        border: 1px solid var(--text-primary);
+        padding: 0.5rem;
+        border-radius: 0.375rem;
+        transition: border-color 0.3s, box-shadow 0.3s;
     }
     
     .stats-card select:focus {
@@ -127,8 +129,8 @@
 </head>
 <body class="min-h-screen">
     <!-- Mobile Menu Button -->
-    <button id="mobile-menu-button" class="md:hidden fixed top-4 left-4 z-50 bg-white p-2 rounded-lg shadow-lg dark:bg-gray-700">
-        <i class="fas fa-bars text-gray-700 dark:text-gray-300 text-xl"></i>
-    </button>
+<button id="mobile-menu-button" class="md: fixed top-4 left-4 z-50 bg-card p-2 rounded-lg shadow-lg">
+    <i class="fas fa-bars text-text text-xl"></i>
+</button>
     
     
