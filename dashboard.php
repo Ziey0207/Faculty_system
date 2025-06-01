@@ -45,6 +45,22 @@ if (isset($_GET['section'])) {
     }
 }
 
+if (isset($_POST['approve_user'])) {
+    $user_id = (int)$_POST['user_id'];
+    $user_type = $_POST['user_type'];
+    $approver_id = $_SESSION['user_id'];  // Current admin approving
+    
+    try {
+        $stmt = $pdo->prepare("UPDATE $user_type 
+                              SET is_approved = 1, approved_by = ?
+                              WHERE id = ?");
+        $stmt->execute([$approver_id, $user_id]);
+        $success = "User approved successfully!";
+    } catch (PDOException $e) {
+        $error = "Approval failed: " . $e->getMessage();
+    }
+}
+
 // Get user preferences
 $preferences = [
     'theme' => 'system',

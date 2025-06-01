@@ -154,7 +154,7 @@ if (isset($_SERVER['REQUEST_METHOD']) == 'POST' && isset($_POST['login'])) {
         
         try {
             // Check if user exists and is active
-            $sql = "SELECT * FROM $table WHERE username = ? AND is_active = 1";
+            $sql = "SELECT * FROM $table WHERE username = ? AND is_active = 1 AND is_approved = 1";
             $stmt = $pdo->prepare($sql);
             $stmt->execute([$username]);
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -197,7 +197,7 @@ if (isset($_SERVER['REQUEST_METHOD']) == 'POST' && isset($_POST['register'])) {
     $email = trim($_POST['email'] ?? '');
     $contact = trim($_POST['contact'] ?? '');
     $gender = trim($_POST['gender'] ?? '');
-    $address = trim($_POST['address'] ?? ''); // Now optional
+    $address = trim($_POST['address'] ?? ''); 
     $username = trim($_POST['reg_username'] ?? '');
     $password = trim($_POST['reg_password'] ?? '');
     $confirm_password = trim($_POST['confirm_password'] ?? '');
@@ -210,7 +210,6 @@ if (isset($_SERVER['REQUEST_METHOD']) == 'POST' && isset($_POST['register'])) {
     if (empty($email)) $errors[] = "Email is required";
     if (empty($contact)) $errors[] = "Contact number is required";
     if (empty($gender)) $errors[] = "Gender is required";
-    // Address is now optional - removed from required validation
     if (empty($username)) $errors[] = "Username is required";
     if (empty($password)) $errors[] = "Password is required";
     if ($password !== $confirm_password) $errors[] = "Passwords do not match";
@@ -220,17 +219,24 @@ if (isset($_SERVER['REQUEST_METHOD']) == 'POST' && isset($_POST['register'])) {
         switch($user_type) {
             case 'admin':
                 $table = 'admins';
-                $user_type = 'admin'; // Force to regular admin
+                $role = 'admin';
+                $is_approved = 0; // Requires approval
                 break;
             case 'faculty':
                 $table = 'faculty';
+                $role = ''; // Not needed for faculty
+                $is_approved = 0; // Requires approval
                 break;
             case 'student':
             case 'staff':
                 $table = 'users';
+                $role = $user_type; // 'student' or 'staff'
+                $is_approved = 0; // Requires approval
                 break;
             default:
                 $table = 'users';
+                $role = 'student';
+                $is_approved = 0; // Requires approval
         }
         
         // Check if username already exists
@@ -240,42 +246,52 @@ if (isset($_SERVER['REQUEST_METHOD']) == 'POST' && isset($_POST['register'])) {
             if ($stmt->rowCount() > 0) {
                 $errors[] = "Username already exists";
             } else {
-                // PLAIN TEXT PASSWORD
+                // PLAIN TEXT PASSWORD (should be hashed in production)
                 $plain_password = $password;
                 
-                // Insert new user
-                $insert_sql = "INSERT INTO $table (
-                    first_name, last_name, middle_name, email, contact_number, 
-                    gender, address, username, password, is_active";
-                
-                // Add type/role if needed
+                // Prepare SQL based on table structure
                 if ($table === 'admins') {
-                    $insert_sql .= ", role) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?)";
-                } elseif ($table === 'users') {
-                    $insert_sql .= ", type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?)";
-                } else {
-                    $insert_sql .= ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1)";
+                    $insert_sql = "INSERT INTO admins (
+                        first_name, last_name, middle_name, email, contact_number, 
+                        gender, address, username, password, role, is_approved, created_at
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())";
+                    
+                    $params = [
+                        $first_name, $last_name, $middle_name, $email, $contact,
+                        $gender, $address, $username, $plain_password, $role, $is_approved
+                    ];
+                } 
+                elseif ($table === 'faculty') {
+                    // Generate faculty ID number (you might have a better system)
+                    $id_no = 'FAC-' . strtoupper(substr($first_name, 0, 1)) . substr($last_name, 0, 3) . rand(100, 999);
+                    
+                    $insert_sql = "INSERT INTO faculty (
+                        id_no, first_name, last_name, middle_name, email, contact_number, 
+                        gender, address, username, password, is_approved, created_at
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())";
+                    
+                    $params = [
+                        $id_no, $first_name, $last_name, $middle_name, $email, $contact,
+                        $gender, $address, $username, $plain_password, $is_approved
+                    ];
+                } 
+                else { // users table
+                    $insert_sql = "INSERT INTO users (
+                        first_name, last_name, middle_name, email, contact_number, 
+                        gender, address, username, password, type, is_approved, created_at
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())";
+                    
+                    $params = [
+                        $first_name, $last_name, $middle_name, $email, $contact,
+                        $gender, $address, $username, $plain_password, $role, $is_approved
+                    ];
                 }
                 
                 $stmt = $pdo->prepare($insert_sql);
-                
-                // Prepare parameters
-                $params = [
-                    $first_name, $last_name, $middle_name, $email, $contact,
-                    $gender, $address, $username, $plain_password
-                ];
-                
-                // Add type/role if needed
-                if ($table === 'admins') {
-                    $params[] = 'admin';
-                } elseif ($table === 'users') {
-                    $params[] = $user_type;
-                }
-                
                 $stmt->execute($params);
                 
                 if ($stmt->rowCount() > 0) {
-                    $register_success = "Registration successful! Please login.";
+                    $register_success = "Registration submitted! Your account requires admin approval before you can login.";
                 } else {
                     $errors[] = "Registration failed. Please try again.";
                 }
@@ -527,12 +543,14 @@ if (isset($_SERVER['REQUEST_METHOD']) == 'POST' && isset($_POST['register'])) {
                 <?php if (isset($login_error)): ?>
                     <div class="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 mb-6 error-message" role="alert">
                         <p><?php echo $login_error; ?></p>
+                        <p class="text-sm mt-2">If you've just registered, your account may be pending approval.</p>
                     </div>
                 <?php endif; ?>
                 
                 <?php if (isset($register_success)): ?>
                     <div class="bg-green-50 border-l-4 border-green-500 text-green-700 p-4 mb-6" role="alert">
                         <p><?php echo $register_success; ?></p>
+                        <p class="text-sm mt-2">You'll receive an email notification when your account is approved.</p>
                     </div>
                 <?php endif; ?>
                 

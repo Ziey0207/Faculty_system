@@ -50,6 +50,8 @@
         border-radius: 0.375rem;
         transition: border-color 0.3s, box-shadow 0.3s;
     }
+
+    
     
     .stats-card select:focus {
         border-color: var(--primary);

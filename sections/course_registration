@@ -1,0 +1,73 @@
+<?php
+// Get available courses
+$courses = [];
+try {
+    $stmt = $pdo->prepare("SELECT * FROM courses");
+    $stmt->execute();
+    $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    $error = "Error fetching courses: " . $e->getMessage();
+}
+
+// Get registered courses
+$registered = [];
+try {
+    $stmt = $pdo->prepare("SELECT c.* FROM courses c 
+                          JOIN student_courses sc ON c.id = sc.course_id 
+                          WHERE sc.student_id = ?");
+    $stmt->execute([$_SESSION['user_id']]);
+    $registered = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    $error = "Error fetching registered courses: " . $e->getMessage();
+}
+?>
+
+<div class="container mx-auto p-4">
+    <h2 class="text-2xl font-bold mb-6">Course Registration</h2>
+    
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Available Courses -->
+        <div class="stats-card bg-card p-6 rounded-lg shadow">
+            <h3 class="text-lg font-semibold mb-4">Available Courses</h3>
+            <div class="space-y-4">
+                <?php foreach ($courses as $course): ?>
+                <div class="flex justify-between items-center p-3 border rounded-lg">
+                    <div>
+                        <h4 class="font-semibold"><?= htmlspecialchars($course['course_code']) ?> - <?= htmlspecialchars($course['course_name']) ?></h4>
+                        <p class="text-sm text-secondary"><?= htmlspecialchars($course['description']) ?></p>
+                    </div>
+                    <button class="bg-primary hover:bg-primary-hover text-white px-3 py-1 rounded">
+                        <i class="fas fa-plus"></i> Register
+                    </button>
+                </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+        
+        <!-- Registered Courses -->
+        <div class="stats-card bg-card p-6 rounded-lg shadow">
+            <h3 class="text-lg font-semibold mb-4">My Courses</h3>
+            <?php if (count($registered) > 0): ?>
+            <div class="space-y-4">
+                <?php foreach ($registered as $course): ?>
+                <div class="flex justify-between items-center p-3 border rounded-lg">
+                    <div>
+                        <h4 class="font-semibold"><?= htmlspecialchars($course['course_code']) ?> - <?= htmlspecialchars($course['course_name']) ?></h4>
+                        <p class="text-sm text-secondary">Status: Registered</p>
+                    </div>
+                    <button class="bg-danger hover:bg-danger-hover text-white px-3 py-1 rounded">
+                        <i class="fas fa-trash"></i> Drop
+                    </button>
+                </div>
+                <?php endforeach; ?>
+            </div>
+            <?php else: ?>
+            <div class="text-center py-8">
+                <i class="fas fa-book-open text-4xl text-secondary mb-4"></i>
+                <p>You haven't registered for any courses yet</p>
+                <p class="text-sm text-secondary mt-2">Select courses from the available list to register</p>
+            </div>
+            <?php endif; ?>
+        </div>
+    </div>
+</div>
